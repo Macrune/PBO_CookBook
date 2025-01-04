@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 
 
+
+
 @Controller
 @RequestMapping("")
 public class UserController {
@@ -42,7 +44,7 @@ public class UserController {
 
     @GetMapping("/login")
     public String Login() {
-        return "login";
+        return "Loginform";
     }
 
     @GetMapping("/logout")
@@ -54,7 +56,7 @@ public class UserController {
 
     @GetMapping("/register")
     public String signupForm() {
-        return "register";
+        return "sign";
     }
     
     @PostMapping("/login")
@@ -63,9 +65,9 @@ public class UserController {
             User user = service.authenticateUser(request.getUsername(), request.getPassword());
             Cookie cookie = new Cookie("userCookie", user.getImdbId());
             response.addCookie(cookie);
-            return "redirect:/homepage";
+            return "redirect:/";
         }catch(Exception e) {
-            return "/login?failed=true";
+            return "/login";
         }
     }
 
@@ -73,9 +75,9 @@ public class UserController {
     public String register(SignupRequest request) {
         try {
             service.registerUser(request.getUsername(), request.getEmail(), request.getPassword());
-            return "login";
+            return "redirect:/login";
         }catch(Exception e) {
-            return "homepage";
+            return "redirect:/";
         }
     }
     
@@ -111,6 +113,22 @@ public class UserController {
         }
     }
 
+    @GetMapping("/profile")
+    public String userProfile(@CookieValue(value = "userCookie", defaultValue = "Guest") String cookie, Model model) {
+        try {
+            if (cookie.equals("Guest")) {
+                return "redirect:/login";
+            }else {
+                @SuppressWarnings("unused")
+                User user = service.findUserByImdbId(cookie);
+                return "redirect:/account/" + cookie;
+            }
+        }catch (Exception e) {
+            return "redirect:/";
+        }
+    }
+    
+
     @GetMapping("/account/{imdbId}")
     public String findUser(@PathVariable String imdbId, @CookieValue(value = "userCookie", defaultValue = "Guest") String cookie,
                             Model model) {
@@ -126,16 +144,45 @@ public class UserController {
             for (Recipe rp : user.getBookmarks()) {
                 bookmarks.add(recipeService.convertToResponseCard(rp));
             }
+            
+            if (myRecipes.isEmpty()) {
+                model.addAttribute("myRecipeNull", true);
+            }else {
+                model.addAttribute("myRecipeNull", false);
+            }
+
+            if (bookmarks.isEmpty()) {
+                model.addAttribute("bookmarksNull", true);
+            }else {
+                model.addAttribute("bookmarksNull", false);
+            }
+
+            if (user.getImdbId().matches(cookie)) {
+                model.addAttribute("isUser", true);
+            }else {
+                model.addAttribute("isUser", false);
+            }
 
             model.addAttribute("myrecipes", myRecipes);
             model.addAttribute("bookmarks", bookmarks);
             model.addAttribute("cookie", cookie);
-            model.addAttribute("userResponse", userResponse);
+            model.addAttribute("user", userResponse);
             return "profile";
+            // return new ResponseEntity<Model>(model, HttpStatus.OK);
         }catch (Exception e) {
-            return "redirect:/homepage";
+            return "redirect:/";
+            // return new ResponseEntity<Model>(model, HttpStatus.OK);
         }
     }
     
+    @GetMapping("/api/account/{imdbId}")
+    public ResponseEntity<?> getMethodName(@PathVariable String imdbId) {
+        try {
+            User user = service.findUserByImdbId(imdbId);
+            return new ResponseEntity<User>(user, HttpStatus.OK);
+        }catch (Exception e) {
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.OK);
+        }
+    }
     
 }
