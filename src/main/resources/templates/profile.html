@@ -55,7 +55,7 @@
             <div class="recipe-list" th:if="${myRecipeNull == false}">
                 <th:block  th:each="myrecipe : ${myrecipes}">
                     <div class="recipe-card">
-                        <img th:src="@{/data/user/image1.jpeg}" alt="Lemon Garlic Grilled Chicken" class="recipe-img">
+                        <img th:src="@{${myrecipe.mainImage}}" alt="Lemon Garlic Grilled Chicken" class="recipe-img">
                         <p class="recipe-author" th:text="${myrecipe.author.username}">By: Chef John</p>
                         <h4 class="recipe-title" th:text="${myrecipe.tittle}">Lemon Garlic Grilled Chicken</h4>
                         <p class="recipe-description" th:text="${myrecipe.Description}" >A delicious grilled chicken recipe with lemon and garlic flavors to excite your taste buds.</p>
@@ -79,7 +79,7 @@
             <div class="recipe-list" th:if="${bookmarksNull == false}" >
                 <th:block th:each="bookmark : ${bookmarks}">
                     <div class="recipe-card">
-                        <img th:src="@{/data/user/image1.jpeg}" alt="Lemon Garlic Grilled Chicken" class="recipe-img">
+                        <img th:src="@{${bookmark.mainImage}}" alt="Lemon Garlic Grilled Chicken" class="recipe-img">
                         <p class="recipe-author" th:text="${bookmark.author.username}">By: Chef John</p>
                         <h4 class="recipe-title" th:text="${bookmark.tittle}">Lemon Garlic Grilled Chicken</h4>
                         <p class="recipe-description" th:text="${bookmark.Description}" >A delicious grilled chicken recipe with lemon and garlic flavors to excite your taste buds.</p>
